@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "chai": "^4.3.6",
+    "chai-http": "^4.3.0",
+    "mocha": "^10.0.0"
+  },
+  "type": "module",
+  "scripts": {
+    "test": "mocha ./tests/* --timeout 30000"
+  }
+}
