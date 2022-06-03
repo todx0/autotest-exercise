@@ -52,8 +52,5 @@ export const deleteData = async () => {
  */
 export const getLength = async () => {
 	const response = await chai.request(api.url).get(api.exercise)
-	/* 	if (response.body.length > 0) {
-		return [response.body.length, response.body[0]['main_key']]
-	} */
 	return response.body.length
 }
