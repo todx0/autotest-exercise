@@ -18,7 +18,7 @@ describe('POST', () => {
 	after(async () => {
 		await deleteData()
 	})
-	it('should update value', () => {
+	it('should update value', done => {
 		chai.request(api.url)
 			.post(api.exercise)
 			.set('content-type', 'application/json')
@@ -32,13 +32,15 @@ describe('POST', () => {
 				expect(res.body).to.have.keys('main_key', 'value')
 				expect(res.body['main_key']).to.be.equal('key_0')
 				expect(res.body['value']).to.be.equal('post_value')
+				expect(res).to.have.header('content-type', 'application/json')
+				done()
 			})
 	})
 
 	/**
 	 * Despite grammar issues the error message still doesn't make any sense since it's about 'value', not 'main_key'
 	 */
-	it('attempts to update non existing main_key', () => {
+	it('attempts to update non existing main_key', done => {
 		chai.request(api.url)
 			.post(api.exercise)
 			.set('content-type', 'application/json')
@@ -49,13 +51,14 @@ describe('POST', () => {
 			.end((err, res) => {
 				expect(err).to.have.status(400)
 				expect(err.rawResponse).to.be.equal('value dose not exist')
+				done()
 			})
 	})
 
 	/**
 	 * Another non-informative error message but overall behavior is ok.
 	 */
-	it('attempts to update key without value', () => {
+	it('attempts to update key without value', done => {
 		chai.request(api.url)
 			.post(api.exercise)
 			.set('content-type', 'application/json')
@@ -65,6 +68,7 @@ describe('POST', () => {
 			.end((err, res) => {
 				expect(err).to.have.status(400)
 				expect(err.rawResponse).to.be.equal("'value'")
+				done()
 			})
 	})
 
@@ -72,7 +76,7 @@ describe('POST', () => {
 	 * Again as I mentioned in the comment in PUT test, endpoint returns value with a new key,
 	 * although new key is not present when trying to access is with GET request.
 	 */
-	it('attempts to update key with another key', () => {
+	it('attempts to update key with another key', done => {
 		chai.request(api.url)
 			.post(api.exercise)
 			.set('content-type', 'application/json')
@@ -87,6 +91,8 @@ describe('POST', () => {
 				 * inside the backend and how it's handled.
 				 * */
 				expect(res.body).to.have.keys('main_key', 'value', 'another_key')
+				expect(res).to.have.header('content-type', 'application/json')
+				done()
 			})
 	})
 })

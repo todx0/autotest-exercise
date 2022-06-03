@@ -24,18 +24,20 @@ describe('PUT quota checks', () => {
 	/**
 	 * And here we're checking with GET request that response body length in indeed more that 10
 	 */
-	it('checks that 11 keys created', () => {
+	it('checks that 11 keys created', done => {
 		chai.request(api.url)
 			.get(api.exercise)
 			.end((err, res) => {
 				expect(res.body.length).to.be.equal(11)
+				expect(res).to.have.header('content-type', 'application/json')
+				done()
 			})
 	})
 	/**
 	 * Finally checking that at least we're handling the error right.
 	 * Although response text is informative i'd fix grammar to make it more readable.
 	 */
-	it('should returns error', () => {
+	it('should returns error', done => {
 		chai.request(api.url)
 			.put(api.exercise)
 			.set('content-type', 'application/json')
@@ -46,6 +48,7 @@ describe('PUT quota checks', () => {
 			.end((err, res) => {
 				expect(err).to.have.status(400)
 				expect(err.rawResponse).to.be.equal('you reached your quta')
+				done()
 			})
 	})
 })

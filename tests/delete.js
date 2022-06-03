@@ -23,6 +23,7 @@ describe('DELETE', () => {
 	it('delete a key & check response', async () => {
 		chai.request(api.url)
 			.delete(api.exercise)
+			.set('content-type', 'application/json')
 			.send({
 				main_key: `key_0`,
 			})
@@ -31,14 +32,19 @@ describe('DELETE', () => {
 				expect(res.body).to.be.a('object')
 				expect(res.body).to.have.all.keys('main_key')
 				expect(res.body['main_key']).to.be.a('string')
+				expect(res).to.have.header('content-type', 'application/json')
 			})
 		await createData(1)
 	})
 	it('delete a key & assert key removed', async () => {
 		const lenAfter = await getLength()
-		await chai.request(api.url).delete(api.exercise).send({
-			main_key: `key_1`,
-		})
+		await chai
+			.request(api.url)
+			.delete(api.exercise)
+			.set('content-type', 'application/json')
+			.send({
+				main_key: `key_1`,
+			})
 		expect(lenAfter).to.be.equal(lenBefore - 1)
 	})
 })
