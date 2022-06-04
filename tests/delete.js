@@ -26,7 +26,7 @@ describe('DELETE', () => {
 			.delete(api.exercise)
 			.set('content-type', 'application/json')
 			.send({
-				main_key: `key_0`,
+				main_key: 'key_0',
 			})
 			.end((err, res) => {
 				expect(res).to.have.status(200)
@@ -45,7 +45,7 @@ describe('DELETE', () => {
 			.delete(api.exercise)
 			.set('content-type', 'application/json')
 			.send({
-				main_key: `key_1`, // it's a bad practice to harcode a value
+				main_key: 'key_1', // it's a bad practice to harcode a value
 			})
 		expect(lenAfter).to.be.equal(lenBefore - 1)
 	})
@@ -60,7 +60,7 @@ describe('DELETE', () => {
 			.delete(api.exercise)
 			.set('content-type', 'application/json')
 			.send({
-				main_key: `key_that_doesnt_exist`,
+				main_key: 'key_that_doesnt_exist',
 			})
 			.end((err, res) => {
 				expect(res).to.have.status(200)
@@ -86,8 +86,8 @@ describe('DELETE', () => {
 				.send(el)
 				.end((err, res) => {
 					expect(err.rawResponse)
-					done()
 				})
 		}
+		done()
 	})
 })

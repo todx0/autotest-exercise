@@ -26,7 +26,7 @@ describe('GET', () => {
 			})
 	})
 
-	it(`should return 10 elements`, async () => {
+	it('should return 10 elements', async () => {
 		await createData(10)
 		chai.request(api.url)
 			.get(api.exercise)

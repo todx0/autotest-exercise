@@ -6,6 +6,14 @@
   },
   "type": "module",
   "scripts": {
-    "test": "mocha ./tests/* --timeout 30000"
+    "test": "mocha ./tests/* --timeout 40000"
+  },
+  "standard": {
+    "env": [
+      "mocha"
+    ]
+  },
+  "devDependencies": {
+    "eslint": "^8.17.0"
   }
 }

@@ -5,10 +5,10 @@ import chaiHttp from 'chai-http'
 chai.use(chaiHttp)
 
 /**
- * I use this abomination since I don't have an access
- * to the database and the data for tests should be consistent.
- * It checks for value with GET request and if it's empty it creates
- * data with PUT request.
+ * I use this abomination since I don't have an access to the database and
+ * the data for tests should be consistent. It checks for value with GET request
+ * and if it's empty it createsdata with PUT request.
+ * This is also why I have this huge timeout for mocha.
  */
 export const createData = async num => {
 	const response = await chai.request(api.url).get(api.exercise)
