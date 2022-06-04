@@ -7,7 +7,7 @@ chai.use(chaiHttp)
 
 /**
  * !!!
- * Most tests were done for PUT method. I didn't wanted to repeat same tests and covered only basics
+ * Most tests were done for PUT method. I didn't want to repeat same tests and covered only basics
  * since they're mostly the same.
  */
 describe('POST', () => {

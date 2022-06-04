@@ -7,7 +7,7 @@ chai.use(chaiHttp)
 
 /**
  * !!!
- * Most tests were done for PUT method. I didn't wanted to repeat same tests and covered only basics
+ * Most tests were done for PUT method. I didn't want to repeat same tests and covered only basics
  * since they're mostly the same.
  */
 var lenBefore
@@ -52,7 +52,8 @@ describe('DELETE', () => {
 
 	/**
 	 * It's not mentioned in the requirements that the server should return an error if the key doesn't exist
-	 * but seems like bug to me. Added positive assertions to prove it.
+	 * but seems like bug to me. Added positive assertions to prove it. Endpoint should probably return 400
+	 * with proper error message that the key doesn't exist.
 	 */
 	it('delete non-existing value', async () => {
 		chai.request(api.url)
