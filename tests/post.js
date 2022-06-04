@@ -18,6 +18,7 @@ describe('POST', () => {
 	after(async () => {
 		await deleteData()
 	})
+
 	it('should update value', done => {
 		chai.request(api.url)
 			.post(api.exercise)

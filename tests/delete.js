@@ -20,6 +20,7 @@ describe('DELETE', () => {
 	after(async () => {
 		await deleteData()
 	})
+
 	it('delete a key & check response', async () => {
 		chai.request(api.url)
 			.delete(api.exercise)
@@ -36,6 +37,7 @@ describe('DELETE', () => {
 			})
 		await createData(1)
 	})
+
 	it('delete a key & assert key removed', async () => {
 		const lenAfter = await getLength()
 		await chai
@@ -43,8 +45,46 @@ describe('DELETE', () => {
 			.delete(api.exercise)
 			.set('content-type', 'application/json')
 			.send({
-				main_key: `key_1`,
+				main_key: `key_1`, // it's a bad practice to harcode a value
 			})
 		expect(lenAfter).to.be.equal(lenBefore - 1)
+	})
+
+	/**
+	 * It's not mentioned in the requirements that the server should return an error if the key doesn't exist
+	 * but seems like bug to me. Added positive assertions to prove it.
+	 */
+	it('delete non-existing value', async () => {
+		chai.request(api.url)
+			.delete(api.exercise)
+			.set('content-type', 'application/json')
+			.send({
+				main_key: `key_that_doesnt_exist`,
+			})
+			.end((err, res) => {
+				expect(res).to.have.status(200)
+				expect(res.body).to.be.a('object')
+				expect(res.body).to.have.all.keys('main_key')
+				expect(res.body['main_key']).to.be.a('string')
+				expect(res.body['main_key']).to.be.equal('key_that_doesnt_exist')
+				expect(res).to.have.header('content-type', 'application/json')
+			})
+	})
+
+	/**
+	 * I's anti-pattern to combine different tests in one as they should be isolated and idependent.
+	 * This was done to speed up the process and for simplicity.
+	 */
+	it('Negative checks', async () => {
+		const testData = [, {}, { value: 'test' }]
+		for (let el of testData) {
+			chai.request(api.url)
+				.delete(api.exercise)
+				.set('content-type', 'application/json')
+				.send(el)
+				.end((err, res) => {
+					expect(err.rawResponse)
+				})
+		}
 	})
 })

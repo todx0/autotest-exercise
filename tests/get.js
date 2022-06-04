@@ -12,6 +12,7 @@ describe('GET', () => {
 	after(async () => {
 		await deleteData()
 	})
+
 	it('should return empty array', done => {
 		chai.request(api.url)
 			.get(api.exercise)
@@ -24,6 +25,7 @@ describe('GET', () => {
 				done()
 			})
 	})
+
 	it(`should return 10 elements`, async () => {
 		await createData(10)
 		chai.request(api.url)
