@@ -55,7 +55,7 @@ describe('DELETE', () => {
 	 * but seems like bug to me. Added positive assertions to prove it. Endpoint should probably return 400
 	 * with proper error message that the key doesn't exist.
 	 */
-	it('delete non-existing value', async () => {
+	it('delete non-existing value', done => {
 		chai.request(api.url)
 			.delete(api.exercise)
 			.set('content-type', 'application/json')
@@ -69,6 +69,7 @@ describe('DELETE', () => {
 				expect(res.body['main_key']).to.be.a('string')
 				expect(res.body['main_key']).to.be.equal('key_that_doesnt_exist')
 				expect(res).to.have.header('content-type', 'application/json')
+				done()
 			})
 	})
 
@@ -76,7 +77,7 @@ describe('DELETE', () => {
 	 * I's anti-pattern to combine different tests in one as they should be isolated and idependent.
 	 * This was done to speed up the process and for simplicity.
 	 */
-	it('Negative checks', async () => {
+	it('Negative checks', done => {
 		const testData = [, {}, { value: 'test' }]
 		for (let el of testData) {
 			chai.request(api.url)
@@ -85,6 +86,7 @@ describe('DELETE', () => {
 				.send(el)
 				.end((err, res) => {
 					expect(err.rawResponse)
+					done()
 				})
 		}
 	})
