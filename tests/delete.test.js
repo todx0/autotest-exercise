@@ -1,7 +1,7 @@
 import { api } from '../config.js'
 import chai, { expect } from 'chai'
 import chaiHttp from 'chai-http'
-import { createData, deleteData, getLength } from '../scripts.js'
+import { getLength } from '../scripts.js'
 
 chai.use(chaiHttp)
 
@@ -13,12 +13,7 @@ chai.use(chaiHttp)
 var lenBefore
 describe('DELETE', () => {
 	before(async () => {
-		await deleteData()
-		await createData(3)
 		lenBefore = await getLength()
-	})
-	after(async () => {
-		await deleteData()
 	})
 
 	it('delete a key & check response', async () => {
@@ -34,20 +29,14 @@ describe('DELETE', () => {
 				expect(res.body).to.have.all.keys('main_key')
 				expect(res.body['main_key']).to.be.a('string')
 				expect(res).to.have.header('content-type', 'application/json')
+				chai.request(api.url)
+					.get(api.exercise)
+					.set('content-type', 'application/json')
+					.end((err, res) => {
+						expect(res.body.length).to.be.equal(lenBefore - 1)
+						expect(res.body).to.not.include({ main_key: 'key_0', value: 'value_0' })
+					})
 			})
-		await createData(1)
-	})
-
-	it('delete a key & assert key removed', async () => {
-		const lenAfter = await getLength()
-		await chai
-			.request(api.url)
-			.delete(api.exercise)
-			.set('content-type', 'application/json')
-			.send({
-				main_key: 'key_1', // it's a bad practice to harcode a value
-			})
-		expect(lenAfter).to.be.equal(lenBefore - 1)
 	})
 
 	/**

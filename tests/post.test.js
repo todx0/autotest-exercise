@@ -1,9 +1,11 @@
 import { api } from '../config.js'
 import chai, { expect } from 'chai'
 import chaiHttp from 'chai-http'
+import chaiSubset from 'chai-subset'
 import { createData, deleteData } from '../scripts.js'
 
 chai.use(chaiHttp)
+chai.use(chaiSubset)
 
 /**
  * !!!
@@ -12,29 +14,32 @@ chai.use(chaiHttp)
  */
 describe('POST', () => {
 	before(async () => {
-		await deleteData()
-		await createData(1)
-	})
-	after(async () => {
-		await deleteData()
+		await createData(3)
 	})
 
 	it('should update value', done => {
+		const data = {
+			value: 'post_value',
+			main_key: 'key_1',
+		}
 		chai.request(api.url)
 			.post(api.exercise)
 			.set('content-type', 'application/json')
-			.send({
-				main_key: 'key_0',
-				value: 'post_value',
-			})
+			.send(data)
 			.end((err, res) => {
 				expect(res).to.have.status(200)
 				expect(res.body).to.be.a('object')
 				expect(res.body).to.have.keys('main_key', 'value')
-				expect(res.body['main_key']).to.be.equal('key_0')
-				expect(res.body['value']).to.be.equal('post_value')
+				expect(res.body['main_key']).to.be.equal(data.main_key)
+				expect(res.body['value']).to.be.equal(data.value)
 				expect(res).to.have.header('content-type', 'application/json')
-				done()
+				chai.request(api.url)
+					.get(api.exercise)
+					.set('content-type', 'application/json')
+					.end((err, res) => {
+						expect(res.body).to.containSubset([data])
+						done()
+					})
 			})
 	})
 
@@ -64,7 +69,7 @@ describe('POST', () => {
 			.post(api.exercise)
 			.set('content-type', 'application/json')
 			.send({
-				main_key: 'key_0',
+				main_key: 'key_2',
 			})
 			.end((err, res) => {
 				expect(err).to.have.status(400)
@@ -78,22 +83,33 @@ describe('POST', () => {
 	 * although new key is not present when trying to access is with GET request.
 	 */
 	it('attempts to update key with another key', done => {
+		const postData = {
+			main_key: 'key_2',
+			value: 'value_2',
+			another_key: 'another_value',
+		}
+		const getData = {
+			main_key: 'key_2',
+			value: 'value_2',
+		}
 		chai.request(api.url)
 			.post(api.exercise)
 			.set('content-type', 'application/json')
-			.send({
-				main_key: 'key_0',
-				value: 'value_0',
-				another_key: 'another_value',
-			})
+			.send(postData)
 			.end((err, res) => {
 				/**
-				 * It seems that endpoint returns body that was sent and I'm not sure what happens
-				 * inside the backend and how it's handled.
-				 * */
+				 * Response returns 'another_key, asserting with GET that is's not returned.
+				 */
 				expect(res.body).to.have.keys('main_key', 'value', 'another_key')
 				expect(res).to.have.header('content-type', 'application/json')
-				done()
+				chai.request(api.url)
+					.get(api.exercise)
+					.set('content-type', 'application/json')
+					.end((err, res) => {
+						expect(res.body).to.not.containSubset([postData])
+						expect(res.body).to.containSubset([getData])
+						done()
+					})
 			})
 	})
 })

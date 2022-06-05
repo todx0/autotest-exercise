@@ -1,36 +1,41 @@
 import { api } from '../config.js'
 import chai, { expect } from 'chai'
 import chaiHttp from 'chai-http'
-import { createData, deleteData } from '../scripts.js'
+import chaiSubset from 'chai-subset'
+import { deleteData } from '../scripts.js'
 
 chai.use(chaiHttp)
+chai.use(chaiSubset)
 
 describe('PUT', () => {
 	before(async () => {
-		await deleteData()
-		await createData(1)
-	})
-	after(async () => {
+		console.log('here')
 		await deleteData()
 	})
-
 	describe('create element checks', () => {
 		it('should create one element', done => {
+			const data = {
+				main_key: 'put_key',
+				value: 'put_value',
+			}
 			chai.request(api.url)
 				.put(api.exercise)
 				.set('content-type', 'application/json')
-				.send({
-					main_key: 'put_key', // valid non existing string
-					value: 'put_value', // valid non existing string
-				})
+				.send(data)
 				.end((err, res) => {
 					expect(res).to.have.status(200)
 					expect(res.body).to.be.a('object')
 					expect(res.body).to.have.keys('main_key', 'value')
-					expect(res.body['main_key']).to.be.equal('put_key')
-					expect(res.body['value']).to.be.equal('put_value')
+					expect(res.body['main_key']).to.be.equal(data.main_key)
+					expect(res.body['value']).to.be.equal(data.value)
 					expect(res).to.have.header('content-type', 'application/json')
-					done()
+					chai.request(api.url)
+						.get(api.exercise)
+						.set('content-type', 'application/json')
+						.end((err, res) => {
+							expect(res.body).to.containSubset([data])
+							done()
+						})
 				})
 		})
 
@@ -41,13 +46,14 @@ describe('PUT', () => {
 		 * and receive a valid response. Checked this in Postman. I didn't bother writing tests to an incorrect behavior.
 		 */
 		it('creates another element with empty value', done => {
+			const data = {
+				main_key: 'put_key_empty_value',
+				value: '',
+			}
 			chai.request(api.url)
 				.put(api.exercise)
 				.set('content-type', 'application/json')
-				.send({
-					main_key: 'put_key_empty_value',
-					value: '',
-				})
+				.send(data)
 				.end((err, res) => {
 					// thus I'm not sure what are we expecting from the response.
 					// 400 and and a message about 'value' shouldn't be an empty string?
@@ -55,10 +61,17 @@ describe('PUT', () => {
 					expect(res).to.have.status(200)
 					expect(res.body).to.be.a('object')
 					expect(res.body).to.have.keys('main_key', 'value')
-					expect(res.body['main_key']).to.be.equal('put_key_empty_value')
-					expect(res.body['value']).to.be.equal('')
-					expect(res).to.have.header('content-type', 'application/json')
-					done()
+					expect(res.body['main_key']).to.be.equal(data.main_key)
+					expect(res.body['value']).to.be.equal(data.value)
+					expect(res).to.have.header('content-type', 'application/json') /
+						chai
+							.request(api.url)
+							.get(api.exercise)
+							.set('content-type', 'application/json')
+							.end((err, res) => {
+								expect(res.body).to.containSubset([data])
+								done()
+							})
 				})
 		})
 
@@ -68,18 +81,29 @@ describe('PUT', () => {
 		 * with GET method the number will be converted to a string.
 		 */
 		it('converts numerical value to a string', done => {
+			const data = {
+				main_key: 'numerical_value',
+				value: 123,
+			}
 			chai.request(api.url)
 				.put(api.exercise)
 				.set('content-type', 'application/json')
-				.send({
-					main_key: 'numerical_value',
-					value: 123,
-				})
+				.send(data)
 				.end((err, res) => {
 					// returns value as number
-					expect(res.body['value']).to.be.a('number').and.equal(123)
+					expect(res.body['value']).to.be.a('number').and.equal(data.value)
 					expect(res).to.have.header('content-type', 'application/json')
-					done()
+					chai.request(api.url)
+						.get(api.exercise)
+						.set('content-type', 'application/json')
+						.end((err, res) => {
+							expect(res.body).to.not.containSubset([data])
+							// find and check that value is indeed converted to a string
+							let result = res.body.find(e => e.value === '123')
+							expect(result.value).to.be.a('string')
+							expect(result.main_key).to.be.equal(data.main_key)
+							done()
+						})
 				})
 		})
 
@@ -89,22 +113,23 @@ describe('PUT', () => {
 		 * I'm not sure if they're added to the database or not since GET request doesn't return them.
 		 */
 		it('returns values that are not added', done => {
+			const data = {
+				main_key: 'main_key_that_doesnt_exist',
+				value: 'test_value',
+				some_field: 'value',
+				another_field: 'value',
+			}
 			chai.request(api.url)
 				.put(api.exercise)
 				.set('content-type', 'application/json')
-				.send({
-					main_key: 'main_key_that_doesnt_exist',
-					value: 'test_value',
-					some_field: 'value',
-					another_field: 'value',
-				})
+				.send(data)
 				.end((err, res) => {
-					// commenting the assertion so it doesn't fail the test
-					// expect(res.body).to.not.have.any.keys(['some_field', 'another_field'])
-					// and adding wrong assertion as a proof
-					expect(res.body).to.have.any.keys(['some_field', 'another_field'])
-					expect(res).to.have.header('content-type', 'application/json')
-					done()
+					chai.request(api.url)
+						.get(api.exercise)
+						.end((err, res) => {
+							expect(res.body).to.not.containSubset([data])
+							done()
+						})
 				})
 		})
 	})
@@ -118,8 +143,8 @@ describe('PUT', () => {
 				.put(api.exercise)
 				.set('content-type', 'application/json')
 				.send({
-					main_key: 'key_0', // valid existing string (created in createData() inside before())
-					value: 'value_0', // valid existing string (created in createData() inside before())
+					main_key: 'put_key',
+					value: 'value_0',
 				})
 				.end((err, res) => {
 					expect(err).to.have.status(400)
@@ -186,8 +211,8 @@ describe('PUT', () => {
 				.end((err, res) => {
 					expect(err).to.have.status(400)
 					expect(err.rawResponse).to.be.equal("'list' object has no attribute 'get'") // this is the error message for false
+					done()
 				})
-			done()
 		})
 
 		/**
