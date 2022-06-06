@@ -8,6 +8,10 @@ chai.use(chaiHttp)
 chai.use(chaiSubset)
 
 describe('PUT', () => {
+	before(async () => {
+		console.log('here')
+		await deleteData()
+	})
 	describe('create element checks', () => {
 		it('should create one element', done => {
 			const data = {

@@ -83,15 +83,19 @@ describe('POST', () => {
 	 * although new key is not present when trying to access is with GET request.
 	 */
 	it('attempts to update key with another key', done => {
-		const data = {
+		const postData = {
 			main_key: 'key_2',
 			value: 'value_2',
 			another_key: 'another_value',
 		}
+		const getData = {
+			main_key: 'key_2',
+			value: 'value_2',
+		}
 		chai.request(api.url)
 			.post(api.exercise)
 			.set('content-type', 'application/json')
-			.send(data)
+			.send(postData)
 			.end((err, res) => {
 				/**
 				 * Response returns 'another_key, asserting with GET that is's not returned.
@@ -102,10 +106,10 @@ describe('POST', () => {
 					.get(api.exercise)
 					.set('content-type', 'application/json')
 					.end((err, res) => {
-						expect(res.body).to.containSubset([data])
+						expect(res.body).to.not.containSubset([postData])
+						expect(res.body).to.containSubset([getData])
 						done()
 					})
-				done()
 			})
 	})
 })
